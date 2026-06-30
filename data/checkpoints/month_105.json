@@ -1,0 +1,50 @@
+{
+  "simulation_id": "sim_a8028745",
+  "month_index": 106,
+  "current_date": "2025-04-30",
+  "finished": false,
+  "seconds_per_month": 30.0,
+  "portfolio_value": 147903.63,
+  "portfolio": {
+    "cash": 14736.930634485694,
+    "shares": {
+      "BAC": 395.19338461570624,
+      "COST": 669.0684444455338,
+      "DHR": 14.451080861228439,
+      "DIS": 307.27000424487585,
+      "IBM": 10.543303359405545,
+      "JNJ": 241.96313153468287,
+      "JPM": 42.670422116918225,
+      "ORCL": 34.67205620520248,
+      "PM": 37.73566855021404,
+      "TMO": 64.44865706124618,
+      "TXN": 47.981075930396784,
+      "UNH": 100.33111420298563,
+      "UNP": 83.74849159516717,
+      "WMT": 12.585186976713931,
+      "XOM": 34.40389126771205
+    }
+  },
+  "benchmark_shares": 51.91522614444948,
+  "last_trade_sides": {
+    "BAC": "sell",
+    "COST": "sell",
+    "CRM": "sell",
+    "CVX": "sell",
+    "DHR": "buy",
+    "DIS": "buy",
+    "IBM": "buy",
+    "JNJ": "buy",
+    "JPM": "buy",
+    "MA": "sell",
+    "ORCL": "sell",
+    "PM": "buy",
+    "TMO": "sell",
+    "TXN": "buy",
+    "UNH": "sell",
+    "UNP": "sell",
+    "WMT": "buy",
+    "XOM": "sell"
+  },
+  "completed_month": 105
+}

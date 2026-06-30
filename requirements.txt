@@ -1,0 +1,30 @@
+# Core data stack
+pandas>=2.2
+numpy>=1.26
+pyarrow>=16.0
+duckdb>=1.0
+
+# Market data (ingestion only, never called during simulation)
+yfinance>=0.2.40
+requests>=2.31
+
+# Web server / dashboard backend
+fastapi>=0.110
+uvicorn[standard]>=0.29
+
+# Schema validation
+pydantic>=2.6
+jsonschema>=4.21
+
+# MCP server (exposes deterministic tools to external agents/clients)
+mcp>=1.2
+
+# Config
+python-dotenv>=1.0
+
+# Optional: tracing + LLM. The app runs without these configured.
+langsmith>=0.1.40
+openai>=1.30
+
+# Tests
+pytest>=8.0

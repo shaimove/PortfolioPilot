@@ -1,0 +1,51 @@
+{
+  "simulation_id": "sim_a8028745",
+  "month_index": 2,
+  "current_date": "2016-08-31",
+  "finished": false,
+  "seconds_per_month": 30.0,
+  "portfolio_value": 99854.2,
+  "portfolio": {
+    "cash": 41686.10716320911,
+    "shares": {
+      "ADBE": 3.0483968792330227,
+      "AMZN": 5.780963731006095,
+      "COST": 92.83325098361374,
+      "CRM": 20.51816283683218,
+      "CVX": 17.448594617964954,
+      "DHR": 7.722223847146738,
+      "DIS": 45.40783035405616,
+      "INTC": 45.678942916527774,
+      "KO": 17.133318133360117,
+      "LLY": 4.226723524905207,
+      "MRK": 24.022681100843158,
+      "MSFT": 8.868083786850042,
+      "NFLX": 16.073805423029235,
+      "PEP": 57.40559412361626,
+      "TSLA": 8.410009594908022,
+      "TXN": 6.878628613825196,
+      "WFC": 9.731599310404931
+    }
+  },
+  "benchmark_shares": 51.91522614444948,
+  "last_trade_sides": {
+    "ADBE": "sell",
+    "AMZN": "buy",
+    "COST": "buy",
+    "CRM": "buy",
+    "CVX": "buy",
+    "DHR": "buy",
+    "DIS": "buy",
+    "INTC": "buy",
+    "KO": "buy",
+    "LLY": "sell",
+    "MRK": "buy",
+    "MSFT": "buy",
+    "NFLX": "buy",
+    "PEP": "buy",
+    "TSLA": "buy",
+    "TXN": "buy",
+    "WFC": "buy"
+  },
+  "completed_month": 1
+}

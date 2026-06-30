@@ -1,0 +1,49 @@
+{
+  "simulation_id": "sim_a8028745",
+  "month_index": 5,
+  "current_date": "2016-11-30",
+  "finished": false,
+  "seconds_per_month": 30.0,
+  "portfolio_value": 98880.91,
+  "portfolio": {
+    "cash": 9863.965814996329,
+    "shares": {
+      "ACN": 21.22825733393312,
+      "BAC": 218.82573790128018,
+      "CRM": 29.070568147814623,
+      "CVX": 41.16965269861645,
+      "DHR": 10.85388693761558,
+      "DIS": 67.40835298203801,
+      "JPM": 17.648523943503797,
+      "KO": 27.522782949477687,
+      "MRK": 33.07049049315743,
+      "MSFT": 13.52029978711125,
+      "NKE": 17.72218882369681,
+      "TXN": 9.901053286856829,
+      "UNH": 208.12776496891638,
+      "V": 23.83063121334415,
+      "WFC": 12.889906382289524
+    }
+  },
+  "benchmark_shares": 51.91522614444948,
+  "last_trade_sides": {
+    "ACN": "buy",
+    "BAC": "sell",
+    "COST": "sell",
+    "CRM": "buy",
+    "CVX": "buy",
+    "DHR": "sell",
+    "DIS": "sell",
+    "JPM": "buy",
+    "KO": "sell",
+    "MRK": "sell",
+    "MSFT": "sell",
+    "NKE": "sell",
+    "PEP": "sell",
+    "TXN": "buy",
+    "UNH": "buy",
+    "V": "sell",
+    "WFC": "buy"
+  },
+  "completed_month": 4
+}

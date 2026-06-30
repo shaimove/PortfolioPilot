@@ -1,0 +1,50 @@
+{
+  "simulation_id": "sim_a8028745",
+  "month_index": 21,
+  "current_date": "2018-03-31",
+  "finished": false,
+  "seconds_per_month": 30.0,
+  "portfolio_value": 109264.21,
+  "portfolio": {
+    "cash": 10885.099443549896,
+    "shares": {
+      "ABT": 13.556522761887438,
+      "ACN": 19.146180777397994,
+      "AMZN": 19.66404430054963,
+      "BAC": 212.23854053567197,
+      "CVX": 28.57355170555969,
+      "MA": 15.201569195654946,
+      "META": 29.7413624320759,
+      "MRK": 28.589084410100856,
+      "MSFT": 9.413480783840212,
+      "PEP": 103.28842642771605,
+      "PG": 26.76816269456625,
+      "TSLA": 14.683394297397136,
+      "UNH": 111.35883324412728,
+      "WMT": 124.54271839504857,
+      "XOM": 16.871652849856087
+    }
+  },
+  "benchmark_shares": 51.91522614444948,
+  "last_trade_sides": {
+    "ABT": "buy",
+    "ACN": "sell",
+    "AMZN": "sell",
+    "BAC": "buy",
+    "CVX": "sell",
+    "GOOGL": "sell",
+    "INTC": "sell",
+    "MA": "sell",
+    "META": "buy",
+    "MRK": "sell",
+    "MSFT": "buy",
+    "NKE": "sell",
+    "PEP": "buy",
+    "PG": "buy",
+    "TSLA": "buy",
+    "UNH": "sell",
+    "WMT": "buy",
+    "XOM": "buy"
+  },
+  "completed_month": 20
+}

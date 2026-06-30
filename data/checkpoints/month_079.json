@@ -1,0 +1,48 @@
+{
+  "simulation_id": "sim_a8028745",
+  "month_index": 80,
+  "current_date": "2023-02-28",
+  "finished": false,
+  "seconds_per_month": 30.0,
+  "portfolio_value": 116120.56,
+  "portfolio": {
+    "cash": 11596.465939682561,
+    "shares": {
+      "ACN": 11.190390223327446,
+      "ADBE": 12.270789166434316,
+      "BAC": 412.94677916398985,
+      "CVX": 22.04053037243831,
+      "DHR": 13.9197482099586,
+      "HON": 14.828230340187476,
+      "IBM": 14.735940486811522,
+      "LLY": 75.0998639204291,
+      "MCD": 8.278959089715826,
+      "MRK": 15.833795379907073,
+      "NFLX": 61.819552040286545,
+      "NVDA": 54.91449365198502,
+      "ORCL": 35.90743683603841,
+      "TMO": 135.25153124726307,
+      "WFC": 16.83285847268888
+    }
+  },
+  "benchmark_shares": 51.91522614444948,
+  "last_trade_sides": {
+    "ACN": "buy",
+    "ADBE": "buy",
+    "BAC": "buy",
+    "CVX": "buy",
+    "DHR": "sell",
+    "HON": "buy",
+    "IBM": "sell",
+    "LLY": "buy",
+    "MCD": "sell",
+    "MRK": "sell",
+    "NFLX": "sell",
+    "NVDA": "buy",
+    "ORCL": "sell",
+    "TMO": "buy",
+    "WFC": "buy",
+    "WMT": "sell"
+  },
+  "completed_month": 79
+}
