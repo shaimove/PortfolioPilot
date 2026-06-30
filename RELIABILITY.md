@@ -252,5 +252,6 @@ spike, cost spike.
 | **MCP tools** | `test_mcp_tools.py` |
 | 120-step run, membership changes, monitor, dashboard API | `test_sp500_membership_changes.py` |
 | Dashboard backend | `test_server.py` |
+| Research agent (experimental, not activated) | `test_research_agent.py` |
 
 Run all: `pytest -q` (offline, deterministic; no network or LLM required).

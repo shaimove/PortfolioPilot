@@ -1,34 +1,50 @@
+<div align="center">
+
 # PortfolioPilot
 
-**A local paper-trading / backtesting system for a monitored portfolio agent.**
+### A monitored, observable agentic system for portfolio decision-making
 
-PortfolioPilot simulates monthly portfolio decisions over 10 years using S&P 500
-**stocks** (not ETFs), tracks portfolio performance, monitors abnormal agent
-behavior, and uses an **LLM-as-a-judge** to evaluate whether the portfolio
-agent's decisions are grounded and non-hallucinated. Everything is shown in a
-clean white-background dashboard (no Streamlit).
+*A local paper-trading / backtesting platform where an **LLM portfolio agent** makes monthly S&P 500 decisions over 10 years — wrapped in deterministic guardrails, **LLM-as-a-judge** evaluation, LangSmith tracing, and a live observability dashboard.*
 
-> ⚠️ **Disclaimer.** This is a **simulation and observability project**. It is
-> **not financial advice** and **not a real trading system**. All trades are
-> simulated ("paper") against locally cached historical data.
+![Python](https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688?logo=fastapi&logoColor=white)
+![Pydantic](https://img.shields.io/badge/Pydantic-v2-E92063?logo=pydantic&logoColor=white)
+![LangSmith](https://img.shields.io/badge/Observability-LangSmith-1C3C3C)
+![MCP](https://img.shields.io/badge/MCP-Server-6E56CF)
+![Tests](https://img.shields.io/badge/tests-63%20passing-2ea44f)
+
+</div>
+
+> ⚠️ **Disclaimer.** This is a **simulation and observability project** — **not financial advice and not a real trading system.** All trades are simulated ("paper") against locally cached historical data.
 
 ---
 
-## Why it exists
+## Why this project
 
-It is a sandbox for studying *agent reliability* in a realistic-feeling
-sequential decision loop:
+Shipping an LLM agent is easy. Making it **trustworthy** in a long, sequential decision loop is the hard part. PortfolioPilot is built around that exact problem: it puts a single LLM portfolio agent inside a realistic 120-step backtest and surrounds it with the machinery you'd want in production —
 
-- A single **LLM portfolio decision agent** proposes monthly target weights.
-- Deterministic Python owns everything that must be correct: data, features,
-  risk checks, execution, and metrics.
-- An **LLM judge** reviews each decision *after the fact* for groundedness,
-  hallucination, constraint awareness, and consistency.
-- Two monitoring layers (**LangSmith** for tracing + a **local monitor** for
-  financial/agent/judge metrics) surface problems on a live dashboard.
+- **deterministic guardrails** so the model can never push the system into an illegal state,
+- an **LLM-as-a-judge** that audits every decision for hallucinations and inconsistencies,
+- **two monitoring layers** (LangSmith tracing + a local metrics/alerting monitor),
+- **point-in-time correctness** (no look-ahead bias, real S&P 500 membership changes),
+- **crash-safe checkpointing** and a clean, framework-free dashboard.
 
-The system **runs even if LangSmith and the LLM are not configured**, using
-deterministic fallback logic for both the agent and the judge.
+It's a focused demonstration of **agent reliability, evaluation, and observability** — not another chatbot.
+
+## What this project demonstrates
+
+| Area | In this repo |
+|---|---|
+| **Agentic system design** | One LLM decision agent with strict-JSON I/O, retries, and a deterministic fallback. |
+| **LLM evaluation** | An LLM-as-a-judge scoring groundedness, hallucination risk, constraint awareness, memory use, and consistency — every month. |
+| **Observability** | LangSmith tracing (latency/tokens/cost/versions) + a local monitor with financial, agent-behavior, and judge metrics, plus an incident timeline. |
+| **Guardrails / safety** | A deterministic risk engine that validates and *repairs* every decision; forced-sell handling; long-only / cap / turnover / cash constraints. |
+| **Data engineering** | Local-first ingestion → Parquet/DuckDB; point-in-time universe; no-look-ahead monthly feature engine. |
+| **Schema & contracts** | **Pydantic v2** validation for agent and judge outputs (JSON-Schema derived from the models). |
+| **Tooling / interop** | An **MCP server** exposing the deterministic toolset so external agents can consume it. |
+| **Reliability** | SQLite-backed checkpointing with resume + point-in-time rewind. |
+| **Testing** | 63 deterministic, offline tests (risk, execution, no-look-ahead, judge, membership changes, MCP, schema, checkpoints). |
+| **Product polish** | A white, professional, dependency-free dashboard (FastAPI + vanilla JS). |
 
 ---
 
@@ -43,78 +59,38 @@ ingestion  ───► │ local cache: prices.parquet / monthly_features.parqu
                                             │ (read-only during simulation)
                                             ▼
   ┌──────────────────────── monthly simulation loop (×120) ───────────────────────┐
-  │ universe (point-in-time S&P 500) → market snapshot → memory retrieval →        │
+  │ point-in-time universe → market snapshot → memory retrieval →                  │
   │ DECISION AGENT (LLM or deterministic, strict JSON + retry) →                   │
   │ RISK ENGINE (validate/repair) → BROKER (simulated execution + costs) →         │
   │ benchmark update → memory writes → JUDGE (LLM or deterministic) →              │
-  │ LangSmith trace + local monitor + alerts → dashboard state                     │
+  │ LangSmith trace + local monitor + alerts + checkpoint → dashboard state        │
   └───────────────────────────────────────────────────────────────────────────────┘
                                             │
                                             ▼
                       FastAPI server  ◄──►  white dashboard (HTML/CSS/JS)
+                            ▲
+                            └── MCP server exposes the deterministic tools
 ```
 
-### Key design rules (enforced)
-
-- **No online APIs during the simulation loop.** All data is downloaded/cached
-  *before* simulation; the loop reads only local Parquet/DuckDB/SQLite.
-- **No look-ahead bias.** Features for month-end `t` use only data dated `≤ t`
-  (guarded by `tests/test_no_lookahead.py`).
-- **No raw price history to the LLM.** Python computes signals/returns/risk; the
-  agent receives only compact JSON summaries and must output strict JSON.
-- The **judge never trades** — it only evaluates decisions after they are made.
-
----
-
-## Repo layout
-
-```
-portfoliopilot/
-  data/        ingestion.py providers.py cache.py universe.py
-  features/    feature_engine.py
-  agent/       decision_agent.py prompts.py schemas.py
-  execution/   risk_engine.py broker_simulator.py
-  memory/      memory_store.py retriever.py
-  monitoring/  langsmith_tracing.py local_monitor.py judge.py metrics.py alerts.py
-  simulation/  engine.py
-  server.py    llm.py config.py utils.py
-dashboard/     index.html styles.css app.js
-scripts/       ingest_constituents.py ingest_prices.py ingest_fundamentals.py
-               build_features.py run_smoke_test.py
-tests/
-```
-
----
-
-## Setup
-
-```bash
-python3.13 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-```
-
-Optional integrations (the app runs without them):
-
-```bash
-cp .env.example .env      # then fill in OPENAI_API_KEY / LANGSMITH_API_KEY
-```
+**Design principles enforced (and tested):** no online APIs in the loop · no look-ahead bias · no raw price history sent to the LLM · the judge never trades · the system runs fully **without** any LLM or LangSmith via deterministic fallbacks. Deep dive: **[`RELIABILITY.md`](RELIABILITY.md)**.
 
 ---
 
 ## Quickstart
 
-### Option A — fully offline, deterministic (recommended first run)
-
-No network needed. Uses a deterministic synthetic price generator and a
-point-in-time membership table with built-in index additions/removals.
-
 ```bash
-python scripts/run_smoke_test.py        # ingests, builds features, runs 120 months
-python -m portfoliopilot.server         # then open http://127.0.0.1:8000
+python3.13 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
-### Option B — real historical data (yfinance)
+### Run it fully offline (deterministic, no network, no API keys)
+
+```bash
+python scripts/run_smoke_test.py     # ingest synthetic data → features → run 120 months
+python -m portfoliopilot.server      # open http://127.0.0.1:8000 and press Start
+```
+
+### Run on real historical data (yfinance)
 
 ```bash
 python scripts/ingest_constituents.py --years 10
@@ -124,197 +100,78 @@ python scripts/build_features.py
 python -m portfoliopilot.server
 ```
 
-Open the dashboard, press **Start**, and watch the 120-month simulation run from
-local cached data. Use **Pause**, **Reset**, **Step ▸**, and the **seconds /
-month** control (default 30s; set to 1s for fast testing).
+Optional integrations (the app runs without them): copy `.env.example` → `.env` and set `OPENAI_API_KEY` (enables the LLM agent + judge) and/or `LANGSMITH_API_KEY` (enables tracing).
 
 ---
 
-## Data ingestion
+## The dashboard
 
-`scripts/ingest_*` download/build and **cache everything locally** before any
-simulation:
+A white, professional, **non-Streamlit** UI (FastAPI + vanilla HTML/CSS/JS, self-contained canvas chart). Controls: **Start / Pause / Reset / Step** and seconds-per-simulated-month (default 30s, min 1s). Seven panels:
 
-| Output | Description |
-|---|---|
-| `data/raw/prices/<ticker>.parquet` | per-ticker daily adjusted OHLCV cache |
-| `data/processed/prices.parquet` | consolidated long price table |
-| `data/processed/constituents_monthly.parquet` | point-in-time S&P 500 membership |
-| `data/processed/fundamentals.parquet` | sector (and room for more) |
-| `data/processed/metadata.parquet` | per-ticker validity / first/last date |
-| `data/processed/monthly_features.parquet` | per-stock monthly features |
-| `data/portfoliopilot.duckdb` | DuckDB views over the processed parquet |
-
-**Price data** uses yfinance for MVP adjusted OHLCV; adjusted prices are used for
-returns. Missing prices, delistings, and short histories are tracked, and a
-stock with invalid/insufficient history is **not eligible** to be bought.
-
-**Fundamentals** use a provider abstraction (`data/providers.py`). The MVP ships
-a deterministic stub (sector only) and an optional yfinance provider. The design
-lets you drop in **SEC EDGAR Companyfacts, Alpha Vantage, FMP, or Tiingo** later
-by subclassing `FundamentalsProvider`.
+1. **Simulation Controls** — progress, date, LangSmith status
+2. **Portfolio Overview** — value vs. benchmark, return, drawdown, turnover, cost drag
+3. **Holdings & Transactions** — holdings, buys/sells, forced sells, new entrants
+4. **Agent Behavior** — risk blocks/modifications, violations, invalid JSON, retries, flips
+5. **Judge Monitoring** — groundedness, hallucination risk, unsupported claims, consistency
+6. **Memory Health** — totals, stale usage, judge warnings/criticals
+7. **Incident Timeline** — overtrading, risk, hallucination, latency/cost alerts
 
 ---
 
-## S&P 500 membership handling
+## Highlights
 
-The universe is modeled as **point-in-time** monthly membership
-(`constituents_monthly`: rows of `month_end, ticker`). At each rebalance:
-
-- the tradable universe is the membership known at that date;
-- a held stock that **leaves** the index is force-sold at the next rebalance
-  (logged, and exempt from the turnover cap);
-- stocks that **enter** the index become eligible candidates from the next
-  rebalance (logged);
-- all forced sells and new entrants are recorded as `index_membership_event`
-  memories and shown on the dashboard.
-
-### Survivorship-bias limitation (fallback)
-
-Real point-in-time membership data is **not bundled**. Three builders exist:
-
-- `pit` — load `data/raw/constituents/membership.csv` (`month_end,ticker`) if you
-  provide a real point-in-time dataset (preferred);
-- `synthetic` — deterministic additions/removals (used offline / in tests);
-- `current` — a single static current-constituent list applied to every month.
-
-> **The `current` fallback creates survivorship bias** — today's members are
-> assumed to have always been members, which inflates results. It is the default
-> only for the online MVP when no point-in-time CSV is present. The data model
-> and all logic are point-in-time ready; replace the CSV to remove the bias.
+- **LLM-as-a-judge after every month.** Flags rationale that references facts not in the input (earnings, valuation, analyst ratings, news…), explanation/trade mismatches, ignored forced sells, and stale-memory use. Pydantic-validated, with hard structural checks always merged in.
+- **Always-feasible risk engine.** Sum-to-1, long-only, per-asset & sector caps, cash bounds, turnover throttle (forced sells exempt), eligibility & invalid-history bans — the portfolio can never enter an illegal state.
+- **Point-in-time S&P 500 universe.** Handles index additions/removals through time; forced sells on removal, new entrants become eligible. (Documented survivorship-bias fallback when point-in-time data isn't supplied.)
+- **No look-ahead, by construction & test.** Features at month `t` use only data dated `≤ t` (`tests/test_no_lookahead.py`).
+- **MCP server.** `python -m portfoliopilot.mcp_server` exposes 13 deterministic tools (features, universe, risk, execution, metrics, judge, memory, checkpoints).
+- **Checkpointing.** SQLite-backed `SqliteSaver`; `resume_latest()` and `restore_to(month)` (rewind), exposed via `/api/checkpoints`, `/api/resume`, `/api/restore`.
 
 ---
 
-## Monthly features (no look-ahead)
+## Tech stack
 
-Per eligible stock/month: `ret_1m/3m/6m/12m`, `vol_3m/6m`, `drawdown`,
-`ma_trend`, `volume_trend`, `current_price`, `valid_history`, `sector`.
+**Python 3.13** · pandas / numpy · **DuckDB** + Parquet · **FastAPI** + Uvicorn · **Pydantic v2** · **LangSmith** (optional) · **OpenAI** (optional) · **MCP** (Model Context Protocol) · SQLite · pytest · vanilla HTML/CSS/JS dashboard.
 
-Portfolio-level metrics (value, monthly/benchmark/excess return, max drawdown,
-cash weight, turnover (1m / trailing 3m), transaction-cost drag, transaction
-counts, changed positions, max position weight, sector concentration) are
-computed during simulation in `monitoring/metrics.py` and the engine.
+## Repository layout
 
-Benchmark: `^GSPC` (or SPY) is used **only as a benchmark**, never as a tradable
-asset.
-
----
-
-## Agent, risk & execution
-
-- **Decision agent** (`agent/decision_agent.py`): receives compact JSON, returns
-  strict JSON (schema-validated with retry on invalid JSON). On repeated invalid
-  output or no LLM, it falls back to a deterministic momentum rule-based
-  portfolio. Invalid-JSON and retry counts are logged.
-- **Risk engine** (`execution/risk_engine.py`): enforces sum-to-1, long-only,
-  per-asset cap, sector cap, cash bounds, turnover cap, eligibility, forced
-  sells, and invalid-history bans — always returning a feasible weight vector.
-- **Broker** (`execution/broker_simulator.py`): simulates trades on a
-  share-based portfolio and applies **10 bps** transaction cost per traded
-  dollar; reports turnover, costs, and full trade/holdings metrics.
-
----
-
-## Monitoring
-
-### LLM-as-judge design
-
-The judge (`monitoring/judge.py`) reviews each decision using the agent input,
-agent output, risk result, executed trades, memories, market snapshot, and
-constraints. It scores groundedness, hallucination risk, constraint awareness,
-memory use, and decision/output consistency, and emits structured `issues`.
-
-It flags: rationale referencing facts **not present in the input** (earnings,
-revenue, valuation, analyst ratings, news, fundamentals → `unsupported_claim`);
-explanation/trade mismatches; **ignored forced sells** (critical); stale-memory
-use; overconfidence; and constraint breaches the agent proposed. Hard structural
-checks are always merged in, so an LLM judge can never hide a detectable problem.
-Output is strict JSON (schema-validated; deterministic fallback otherwise).
-
-### Metrics tracked
-
-- **LangSmith** (optional): monthly rebalance trace with agent/judge I/O,
-  latency, tokens, cost, errors, retry count, prompt/model/agent versions,
-  `simulation_id`, `simulated_month`, `universe_name`. The app never crashes if
-  LangSmith is missing.
-- **Local monitor** (SQLite): financial metrics (value, benchmark, total/excess
-  return, max drawdown, turnover, cost drag), agent behavior (transaction/buy/
-  sell/forced-sell/changed counts, risk blocked/modified, constraint violations,
-  same-asset flips, no-action rate, invalid JSON, retries), and judge metrics
-  (the five scores, unsupported claims, warnings, criticals).
-- **Alerts** (`monitoring/alerts.py`): overtrading, turnover > 30%, risk blocks,
-  constraint violations, hallucination risk > 0.30, unsupported claims,
-  same-asset flips, forced-sell-not-executed, invalid-JSON spikes, and
-  latency/cost spikes — shown on the incident timeline.
-
----
-
-## Dashboard
-
-White, professional, non-Streamlit (FastAPI + vanilla HTML/CSS/JS, self-contained
-canvas chart). Sections: Simulation Controls, Portfolio Overview, Holdings &
-Transactions, Agent Behavior, Judge Monitoring, Memory Health, Incident Timeline.
-
-Controls: Start / Pause / Reset / Step, and seconds-per-simulated-month
-(default 30s, min 1s).
-
----
-
-## Reliability, MCP tools & checkpoints
-
-See **[`RELIABILITY.md`](RELIABILITY.md)** for the full detail. In short:
-
-- **Deterministic everything-quantitative.** All stock features, risk, execution,
-  and metrics are deterministic Python; the LLM only proposes weights/prose.
-- **Output checks.** Agent responses are validated with a strict **Pydantic v2**
-  schema (finite weights, valid action/lists), retried on failure, and fall back
-  to a deterministic portfolio. The risk engine then guarantees a feasible state.
-- **LLM-as-judge runs after every month**, with Pydantic-validated output and a
-  deterministic fallback.
-- **Checkpoints.** A SQLite-backed `SqliteSaver` writes a point-in-time
-  checkpoint after every completed month (`data/checkpoints.sqlite`); the engine
-  can `resume_latest()` or `restore_to(month)` (rewind), exposed via
-  `/api/checkpoints`, `/api/resume`, `/api/restore`.
-- **MCP server.** `python -m portfoliopilot.mcp_server` exposes the deterministic
-  tools (features, universe, risk, execution, metrics, judge, memory, checkpoints)
-  over the Model Context Protocol so external agents consume them instead of
-  recomputing/hallucinating.
-
-```bash
-python -m portfoliopilot.mcp_server      # stdio MCP server (run ingestion first)
 ```
+portfoliopilot/
+  data/        ingestion · providers · cache · universe
+  features/    feature_engine (no look-ahead)
+  agent/       decision_agent · prompts · schemas (Pydantic)
+               research_agent · research_sources   ← experimental, not activated
+  execution/   risk_engine · broker_simulator
+  memory/      memory_store · retriever
+  monitoring/  langsmith_tracing · local_monitor · judge · metrics · alerts
+  simulation/  engine · checkpoint (SqliteSaver)
+  server.py · mcp_server.py · llm.py · config.py · utils.py
+dashboard/     index.html · styles.css · app.js
+scripts/       ingest_* · build_features · run_smoke_test · run_research_agent
+tests/         63 offline, deterministic tests
+```
+
+---
+
+## Roadmap
+
+- 🔬 **Fundamental research agent** *(staged, not yet activated — `agent/research_agent.py`)*: reads company fundamental reports and produces buy/hold/avoid recommendations with cited metrics and risks. Built with the same discipline as the decision agent (strict Pydantic JSON, deterministic fallback) and a provider abstraction ready for SEC EDGAR / FMP / Alpha Vantage. It will eventually feed *candidate idea hints* (never direct trades) into the pipeline, with its own judge coverage for the fundamental claims it introduces. Try it: `python scripts/run_research_agent.py`.
+- Vector-based memory retrieval (the MVP is keyword/recency/ticker).
+- Real point-in-time S&P 500 constituents dataset (removes the survivorship-bias fallback).
+- Slippage / market-impact modeling beyond the flat 10 bps cost.
+
+---
 
 ## Tests
 
 ```bash
-pytest -q
+pytest -q        # 63 tests, fully offline & deterministic (no network or LLM required)
 ```
 
-Covers: 120-step simulation; index removal forces a sell; new entrant becomes
-eligible; risk engine rejects invalid weights and caps positions; execution
-turnover & transaction-cost effects; feature engine look-ahead safety; invalid
-JSON → retry/fallback; judge flags unsupported claims and explanation/trade
-mismatches; local monitor writes events; dashboard API returns valid state.
+See **[`RELIABILITY.md`](RELIABILITY.md)** for the full output-check pipeline, stability mechanisms, MCP tool catalog, and the complete monitoring-metric list.
 
 ---
 
-## Enabling LangSmith / the LLM
-
-Set the variables in `.env` (see `.env.example`). With `OPENAI_API_KEY` set, the
-agent and judge use the configured model (`PORTFOLIOPILOT_MODEL`, default
-`gpt-4o-mini`). With `LANGSMITH_API_KEY` set, monthly runs are traced. The
-dashboard shows the live status of both.
-
----
-
-## Known limitations
-
-- The bundled offline universe is a **curated ~50-name subset** of large S&P 500
-  stocks (fast to synthesize); the logic is identical for the full list.
-- Without a point-in-time CSV, the online MVP falls back to **current
-  constituents → survivorship bias** (documented above).
-- Synthetic offline prices are **not real**; they only exercise the pipeline.
-  Use Option B for real history.
-- Transaction costs are a flat 10 bps; no slippage/market-impact/borrow modeling.
-- The MVP memory retriever is keyword/recency/ticker based — **not** a vector
-  store (by design for v1).
+<div align="center">
+<sub>Built as a portfolio project on agentic systems — multi-agent orchestration, learning, and production-grade monitoring/evaluation. Not financial advice.</sub>
+</div>
